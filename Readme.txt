@@ -25,8 +25,8 @@ resolvers ++= Seq(
 
 Getting started:
 
-import ai.x.mongo_query.Implicits._
-import ai.x.mongo_query.dialect.Casbah._
+import org.cvogt.slick_mongo_light.Implicits._
+import org.cvogt.slick_mongo_light.dialect.Casbah._
 
 // compare a top-level field
 col.find(m"someField" > 1) // {"someField" : {"$gt": 1}}
