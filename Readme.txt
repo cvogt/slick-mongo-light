@@ -35,16 +35,19 @@ col.find(m"someField" > 1) // {"someField" : {"$gt": 1}}
 col.find(m"someField.nestedField" === 1) // {"someField" : 1}
 
 // compare multiple fields
+// {"someField" : {"nestedField1": 1, "nestedField2": "foo"}}
 col.find(m"someField" -> {
   m"nestedField1" === 1 && m"nestedField2" === "foo"
 })
 
 // mix mongo queries and slick-mongo-light queries
+// {"someField" : {"nestedField1": 1, "nestedField2": "foo"}}
 col.find(m"someField" -> {
 m"nestedField1" === 1 && MongoDBObject("nestedField2" -> MongoDBObject("$eq" -> "foo"))
 })
 
 // check existence in a list
+// {"someField" : {"$in": [1,2,3]}}
 col.find(m"someField" in List(1,2,3))
 
 
