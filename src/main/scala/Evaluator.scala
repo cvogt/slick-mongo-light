@@ -19,24 +19,23 @@ class Evaluator[D <: Dialect](val js: D){
         case f :: tail => applyNestedFields( tail, js.object_( f -> ex ) )
       }
 
-  private def anyToJson(v: Any): js.Value = v match {
-    case v: Expression => toJson(v)
-    case null => js.null_
-    case v: Int => js.int(v)
-    case v: Long => js.long(v)
-    case v: Double => js.double(v)
-    case v: Float => js.float(v)
-    case v: String => js.string(v)
-  }
-
   class ExpressionExtensions(val ex: Expression){
     def toJson: js.Value = evaluator.toJson(ex).asInstanceOf[js.Value]
+  }
+
+  def anyToJson(any: Any) = any match{
+    case v: Expression => toJson(v)
+    case other => js.scalar(other)
   }
 
   def toJson(ex: Expression): js.Value = {
     implicit def ExpressionExtensions(ex: Expression) = new ExpressionExtensions(ex)
     ex match{
-      case Constant(c) => anyToJson(c)
+      case Scalar(c) => try{
+        js.scalar(c)
+      } catch {
+        case e:MatchError => throw new Exception("Type not supported by chosen dialect: "+c.getClass.getName,e)
+      }
       case EmbeddedJson(json) => json.asInstanceOf[js.Value]
       case Sequence(s: Seq[_]) => js.array(s.map(anyToJson) :_*)
       case Object(pairs@_*) => js.object_(pairs.toMap.mapValues(anyToJson).toSeq :_*)
@@ -52,7 +51,7 @@ class Evaluator[D <: Dialect](val js: D){
         InfixOperator(sop,op,Field(field),right).toJson
       case InfixOperator(scalaName,_,_,_) =>
         throw new Exception("Can't use "+scalaName+""" on two m"..."-fields. One needs to be a constant.""")
-      case Field(field) => js.object_( field -> js.boolean(true) )
+      case Field(field) => js.object_( field -> js.scalar(true) )
     }
   }
 }

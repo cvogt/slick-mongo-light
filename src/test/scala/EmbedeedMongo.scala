@@ -4,6 +4,7 @@ import de.flapdoodle.embed.mongo._
 import de.flapdoodle.embed.mongo.config._
 import de.flapdoodle.embed.mongo.distribution._
 import de.flapdoodle.embed.process.config.io._
+import de.flapdoodle.embed.process.runtime._
 import java.util.logging.Logger
 import scala.concurrent._
 import scala.concurrent.duration.Duration
@@ -21,18 +22,21 @@ object EmbeddedMongo{
       .processOutput(ProcessOutput.getDefaultInstanceSilent())
       .build();
 
-  def use(port: Int)(f: => Unit): Unit = Await.result(future(port)(Future(f)), Duration.Inf)
+  def use(f: Int => Unit): Unit = Await.result(future(port => Future(f(port))), Duration.Inf)
 
-  def future(port: Int)(f: => Future[_]): Future[Unit] = {
+  def future(f: Int => Future[_]): Future[Unit] = {
+    val port = Network.getFreeServerPort()
     val dbex = 
       MongodStarter
         .getInstance(runtimeConfig)
         .prepare(config(port))
-    for{
-      db <- Future(dbex.start)
-      _ <- Future(f.recover{ case _ => ()}) // to swallow exceptions
-      _ <- Future(db.stop)
-      _ <- Future(dbex.stop)
-    } yield()
+    val db = dbex.start
+    val res = f(port)
+    res.onComplete{
+      _ =>
+      db.stop
+      dbex.stop      
+    }
+    res.map(_ => ())
   }
 }

@@ -6,18 +6,9 @@ import org.cvogt.slick_mongo_light.expressions._
 object Implicits{
   type Expression = org.cvogt.slick_mongo_light.expressions.Expression
   def field = Field(_)
-  def const[T](value: T) = Constant[T](value)
-  implicit def mongoConstantString(value: String) = Constant(value)
-  implicit def mongoConstantInt(value: Int) = Constant(value)
+  implicit def scalar[T](value: T) = Scalar[T](value)
   implicit def mongoSeq(value: Seq[Any]) = Sequence(value)
-  implicit def mongoConstantNull(value: Null) = Constant(value)
-  implicit def mongoConstantDouble(value: Double) = Constant(value)
-  implicit def mongoConstantFloat(value: Float) = Constant(value)
-  implicit def mongoConstantOptionString(value: Option[String]) = Constant(value.getOrElse(null))
-  implicit def mongoConstantOptionInt(value: Option[Int]) = Constant(value.getOrElse(null))
-  implicit def mongoConstantOptionNull(value: Option[Null]) = Constant(value.getOrElse(null))
-  implicit def mongoConstantOptionDouble(value: Option[Double]) = Constant(value.getOrElse(null))
-  implicit def mongoConstantOptionFloat(value: Option[Float]) = Constant(value.getOrElse(null))
+  implicit def scalaOption(value: Option[_]) = Scalar(value.getOrElse(null))
 
   implicit class MongoFieldStringContext(val context: StringContext) extends AnyVal{
     def m() = Field(context.parts.mkString(""))
@@ -82,7 +73,7 @@ object Implicits{
     // Element
 
     /** \$exists Matches documents that have the specified field. */
-    def exists: Expression = InfixOperator("exists","$exists",value,Constant(true))
+    def exists: Expression = InfixOperator("exists","$exists",value,Scalar(true))
 
     /** \$type Selects documents if a field is of the specified type. */
     def isOfType(tpe: Type): Expression = InfixOperator("isOfType","$type",value,tpe.number)

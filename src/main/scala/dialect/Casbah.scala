@@ -10,17 +10,20 @@ object Casbah{
   import play.api.libs.json._
   val dialect = new Dialect{
     type Value = Any
-    def null_ = null
-    def int(i: Int) = i
-    def long(i: Long) = i
-    def float(i: Float) = i
-    def double(i: Double) = i
-    def boolean(a: Boolean) = a
-    def string(a: String) = a
+    def scalar(v: Any) = v match {
+      case null => null
+      case _:Int | _:Long => v
+      case v: Double => v
+      case v: Float => v
+      case v: String => v
+      case v: Boolean => v
+      case d: org.joda.time.DateTime => d.toDate
+      case l: org.joda.time.LocalDateTime => l.toDateTime.toDate
+    }
     def object_(values: (String, Value)*) = MongoDBObject(values :_*)
     def array(values: Value*) = MongoDBList(values)
   }
-  implicit def embedJson(value: dialect.Value) = EmbeddedJson(value)
+  implicit def embedJson(value: MongoDBObject) = EmbeddedJson(value)
   val evaluator = new Evaluator(dialect)
   implicit def implicitlyToJson(ex: Expression) = ex.toJson.asInstanceOf[DBObject]
   implicit class ExpressionExtensions(val ex: Expression) extends AnyVal{

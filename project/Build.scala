@@ -10,6 +10,7 @@ object MyBuild extends Build{
       scalaVersion := "2.11.5",
       description := "Composable Records and type-indexed Maps for Scala",
       libraryDependencies ++=   Seq(
+        "joda-time" % "joda-time" % "2.6" % "optional",
         "com.typesafe.play" %% "play-json" % "2.3.4" % "optional",
         "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23" % "optional",
         "org.mongodb" %% "casbah" % "2.8.0" % "optional",
@@ -21,7 +22,7 @@ object MyBuild extends Build{
       //scalacOptions ++= Seq("-Xprint:patmat", "-Xshow-phases"),
       testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oFD"),
       parallelExecution := false, // <- until TMap thread-safety issues are resolved
-      version := "0.2-SNAPSHOT",
+      version := "0.2",
       organizationName := "Jan Christopher Vogt",
       organization := "org.cvogt",
       scalacOptions in (Compile, doc) <++= (version,sourceDirectory in Compile,name).map((v,src,n) => Seq(

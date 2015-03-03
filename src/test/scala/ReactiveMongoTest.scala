@@ -15,13 +15,11 @@ import reactivemongo.api._
 import reactivemongo.bson._
 
 class ReactiveMongoTest extends FunSuite{
-  val port = 27019
   val driver = new MongoDriver
-  val connection = driver.connection(List("localhost:"+port))
-
+  
   test("connection"){
-    Await.result(EmbeddedMongo.future(port){
-
+    Await.result(EmbeddedMongo.future{ port =>
+      val connection = driver.connection(List("localhost:"+port))
       val db = connection.db("somedatabase")
       val col = db.collection("somecollection")
 

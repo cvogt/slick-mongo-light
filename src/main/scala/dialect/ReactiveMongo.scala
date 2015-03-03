@@ -7,17 +7,20 @@ object ReactiveMongo{
   import reactivemongo.bson._
   val dialect = new Dialect{
     type Value = BSONValue
-    def null_ = BSONNull
-    def int(i: Int) = BSONInteger(i)
-    def long(i: Long) = BSONLong(i)
-    def float(i: Float) = BSONDouble(i)
-    def double(i: Double) = BSONDouble(i)
-    def boolean(a: Boolean) = BSONBoolean(a)
-    def string(a: scala.Predef.String) = BSONString(a)
+    def scalar(v: Any) = v match {
+      case null => BSONNull
+      case v: Int => BSONInteger(v)
+      case v: Long => BSONLong(v)
+      case v: Double => BSONDouble(v)
+      case v: Float => BSONDouble(v)
+      case v: String => BSONString(v)
+      case v: Boolean => BSONBoolean(v)
+      //case v: org.joda.time.DateTime
+    }
     def object_(values: (String, BSONValue)*) = BSONDocument(values)
     def array(values: BSONValue*) = BSONArray(values)
   }
-  implicit def embedJson(value: dialect.Value) = EmbeddedJson(value)
+  implicit def embedJson(value: BSONDocument) = EmbeddedJson(value)
   implicit def int(i: Int) = BSONInteger(i)
   implicit def long(i: Long) = BSONLong(i)
   implicit def float(i: Float) = BSONDouble(i)

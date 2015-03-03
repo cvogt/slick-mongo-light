@@ -2,12 +2,12 @@ package org.cvogt.slick_mongo_light.expressions
 
 sealed trait Expression
 case class Field(name: String) extends Expression
-case class Constant[T](value: T) extends Expression
+case class Scalar[T](value: T) extends Expression
 case class Sequence[T](value: Seq[T]) extends Expression
 case class Object(pairs: (String, Expression)*) extends Expression
 case class InfixOperator(scalaName: String, mongoName: String, left: Expression, right: Expression) extends Expression
 case class PrefixOperator(scalaName: String, mongoName: String, left: Expression, right: Expression) extends Expression
-case class UnaryOperator(scalaName: String, mongoName: String, expr: Expression) extends Expression
+//case class UnaryOperator(scalaName: String, mongoName: String, expr: Expression) extends Expression
 case class EmbeddedJson[T](json: T) extends Expression
 case class With(field: Field, ex: Expression) extends Expression
 
