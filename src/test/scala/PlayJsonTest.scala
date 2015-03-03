@@ -19,7 +19,7 @@ class PlayJsonTest extends FunSuite{
       (m"foo" -> {m"bar" > 5 && m"baz" === 5}) ->
         js.object_("foo" -> js.object_("$and" -> js.array(
           js.object_("bar" -> js.object_("$gt" -> 5)),
-          js.object_("baz" -> 5)
+          js.object_("baz" -> js.object_("$eq" -> 5))
         )))
     )
     cases.foreach{

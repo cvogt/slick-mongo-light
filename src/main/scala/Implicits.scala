@@ -35,57 +35,59 @@ object Implicits{
     // For comparison of different BSON type values, see the specified BSON comparison order.
 
     /** \$gt Matches values that are greater than the value specified in the query. */
-    def >(other: Expression): Expression = ComparisonOperator(">","$gt",value,other)
+    def >(other: Expression): Expression = InfixOperator(">","$gt",value,other)
 
     /** \$gte  Matches values that are greater than or equal to the value specified in the query. */
-    def >=(other: Expression): Expression = ComparisonOperator(">=","$gte",value,other)
+    def >=(other: Expression): Expression = InfixOperator(">=","$gte",value,other)
 
     /** \$lt Matches values that are less than the value specified in the query. */
-    def <(other: Expression): Expression = ComparisonOperator("<","$lt",value,other)
+    def <(other: Expression): Expression = InfixOperator("<","$lt",value,other)
 
     /** \$lte  Matches values that are less than or equal to the value specified in the query. */
-    def <=(other: Expression): Expression = ComparisonOperator("<=","$lte",value,other)
+    def <=(other: Expression): Expression = InfixOperator("<=","$lte",value,other)
 
     /** \$ne Matches all values that are not equal to the value specified in the query. */
-    def =!=(other: Expression): Expression = ComparisonOperator("=!=","$ne",value,other)
+    def =!=(other: Expression): Expression = InfixOperator("=!=","$ne",value,other)
 
     /** \$ne Matches all values that are not equal to the value specified in the query. */
-    def ===(other: Expression): Expression = ComparisonOperator("===","",value,other)
+    def ===(other: Expression): Expression = InfixOperator("===","$eq",value,other)
 
     /** \$in Matches any of the values that exist in an array specified in the query. */
-    def contains(other: Expression): Expression = ComparisonOperator("contains","$in",value,other)
+    def contains(other: Expression): Expression = InfixOperator("contains","$in",value,other)
 
     /** \$in Matches any of the values that exist in an array specified in the query. */
-    def in(other: Expression): Expression = ComparisonOperator("in","$in",value,other)
+    def in(other: Expression): Expression = InfixOperator("in","$in",value,other)
 
 /*
     /** \$nin  Matches values that do not exist in an array specified to the query. */
-    def (other: Expression): Expression = ComparisonOperator("","$nin",value,other)
+    def notIn(other: Expression): Expression = value !(in other)
 */
 
     // Logical
 
     /** \$or Joins query clauses with a logical OR returns all documents that match the conditions of either clause. */
-    def ||(other: Expression): Expression = LogicalOperator("","$or",value,other)
+    def ||(other: Expression): Expression = PrefixOperator("||","$or",value,other)
 
     /** \$and  Joins query clauses with a logical AND returns all documents that match the conditions of both clauses. */
-    def &&(other: Expression): Expression = LogicalOperator("","$and",value,other)
-
-    /** \$not  Inverts the effect of a query expression and returns documents that do not match the query expression. */
-    def !(other: Expression): Expression = LogicalOperator("","$not",value,other)
+    def &&(other: Expression): Expression = PrefixOperator("&&","$and",value,other)
 
 /*
-    /** \$nor  Joins query clauses with a logical NOR returns all documents that fail to match both clauses. */
-    def (other: Expression): Expression = LogicalOperator("","$nor",value,other)
+    // NOT works differently in Mongo than Scala: http://docs.mongodb.org/manual/reference/operator/query/not/#op._S_not
+    /** \$not  Inverts the effect of a query expression and returns documents that do not match the query expression. */
+    def unary_! : Expression = UnaryOperator("!","$not",value)
 
+    /** \$nor  Joins query clauses with a logical NOR returns all documents that fail to match both clauses. */
+    def (other: Expression): Expression = PrefixOperator("","$nor",value,other)
+*/
     // Element
 
     /** \$exists Matches documents that have the specified field. */
-    def (other: Expression): Expression = Operator("","$exists",value,other)
+    def exists: Expression = InfixOperator("exists","$exists",value,Constant(true))
 
     /** \$type Selects documents if a field is of the specified type. */
-    def (other: Expression): Expression = Operator("","$type",value,other)
+    def isOfType(tpe: Type): Expression = InfixOperator("isOfType","$type",value,tpe.number)
 
+/*
 
     //Evaluation
 

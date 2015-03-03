@@ -4,6 +4,7 @@ import scala.language.implicitConversions
 import com.mongodb.casbah.Imports._
 
 import org.cvogt.slick_mongo_light.expressions._
+import org.cvogt.slick_mongo_light.Evaluator
 
 object Casbah{
   import play.api.libs.json._

@@ -22,44 +22,41 @@ class CasbahTest extends FunSuite{
       val res1 = col.find().iterator.toList.map(_.toList.toMap)
       assert(res1.forall(_.contains("testDoc" -> 1)))
       val res2 = col.find(m"testDoc" === 1).iterator.toList.map(_.toList.toMap)
-      assert(res1.forall(_.contains("testDoc" -> 1)))
+      assert(res2.forall(_.contains("testDoc" -> 1)))
+      val res3 = col.find(m"testDoc".exists).iterator.toList.map(_.toList.toMap)
+      assert(res3.forall(_.contains("testDoc" -> 1)))
+      val res4 = col.find(m"foo".exists).iterator.toList.map(_.toList.toMap)
+      assert(res4.isEmpty)
 
       try{
-      // compare a top-level field
-      col.find(m"someField" === 1)
 
-      // compare a nested field
-      col.find(m"someField.nestedField" === 1)
+        // compare a top-level field
+        col.find(m"someField" === 1)
 
-      // compare multiple fields
-      col.find(m"someField" -> {
-        m"nestedField1" === 1 && m"nestedField2" === "foo"
-      })
+        // compare a nested field
+        col.find(m"someField.nestedField" === 1)
 
-      // compare multiple fields
-      col.find(m"someField" -> {
-        m"nestedField1" === 1 && MongoDBObject("nestedField2" -> MongoDBObject("$eq" -> "foo"))
-      })
+        // compare multiple nested fields
+        col.find(m"someField" -> {
+          m"nestedField1" === 1 && m"nestedField2" === "foo"
+        })
 
-      // check existence in a list
-      col.find(m"someField" in List(1,2,3))
-      } catch {case e:Exception => }
-    }
-  }
-  test("basic"){
-    val cases = Seq[(Expression,js.Value)](
-      (m"foo" > 5) ->
-        js.object_("foo" -> js.object_("$gt" -> 5)),
-      (m"foo.bar" > 5) ->
-        js.object_("foo" -> js.object_("bar" -> js.object_("$gt" -> 5))),
-      (m"foo" -> {m"bar" > 5 && m"baz" === 5}) ->
-        js.object_("foo" -> js.object_("$and" -> js.array(
-          js.object_("bar" -> js.object_("$gt" -> 5)),
-          js.object_("baz" -> 5)
-        )))
-    )
-    cases.foreach{
-      c => assert(c._1.toJson === c._2, "failed for: "+c.toString)
+        // embed ordinary mongo queries
+        col.find(m"someField" -> {
+          m"nestedField1" === 1 && MongoDBObject("nestedField2" -> MongoDBObject("$eq" -> "foo"))
+        })
+
+        // check existence in a list
+        col.find(m"someField" in List(1,2,3))
+
+        // more examples
+        col.find(m"someField".exists)
+
+        import org.cvogt.slick_mongo_light.expressions.Type
+        col.find(m"someField".isOfType(Type.Boolean))
+
+
+      } catch {case e:Exception => } // <- just want to check compilation here, not exceptions
     }
   }
 }

@@ -39,20 +39,4 @@ class ReactiveMongoTest extends FunSuite{
     )}, Duration.Inf)
   }
   import org.cvogt.slick_mongo_light.dialect.ReactiveMongo.{dialect => js}
-  test("basic"){
-    val cases = Seq[(Expression,js.Value)](
-      (m"foo" > 5) ->
-        js.object_("foo" -> js.object_("$gt" -> 5)),
-      (m"foo.bar" > 5) ->
-        js.object_("foo" -> js.object_("bar" -> js.object_("$gt" -> 5))),
-      (m"foo" -> {m"bar" > 5 && m"baz" === 5}) ->
-        js.object_("foo" -> js.object_("$and" -> js.array(
-          js.object_("bar" -> js.object_("$gt" -> 5)),
-          js.object_("baz" -> 5)
-        )))
-    )
-    cases.foreach{
-      c => assert(c._1.toJson === c._2, "failed for: "+c.toString)
-    }
-  }
 }
